@@ -1,0 +1,29 @@
+h1 {
+
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  
+}
+
+body {
+  font-size: 1.2em;
+}
+
+tr {
+  border: solid;
+  border-width: 2px 0;
+  
+}
+
+th, td {
+  font-size:  1.2em;
+  text-align: left;
+  padding: 7px;
+}
+
+td {
+  
+}
