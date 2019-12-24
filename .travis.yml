@@ -1,3 +1,6 @@
 language: rust
 os: osx
 cache: cargo
+before_install:
+  - brew install qt5
+  - brew link qt5 --force
