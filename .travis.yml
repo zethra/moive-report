@@ -6,3 +6,11 @@ before_install:
   - brew link qt5 --force
 script:
   - cargo build --release --verbose --all
+deploy:
+  provider: releases
+  api_key:
+    secure: ek8OMYoufPc3K+Kk53oNguGCqplDoYcW74CKfD0rgofWZyCdGc9degt9dbqzXx+B/14K9hOZS2bKzYD1LsC2b2oMRdTCsUrAibOZilVNi9joCstGUW5PuKuG6+az7IBNrB9o+xt4tnai/lYdWfaxXmd34w/OTLXuPR1qlTKc9f+xiuIzO6STCGYmlUGtATW6mgoYmYkiaE+kcnwpRTX/XZdXAuDsrLVNGdxr7F5NrfYmwYR/pIv+oPBRXpsD6AHrRSGgZIXJ1kzBANBPosnVR0S5Lc/O26KPUgzD3bWhmiZm8n90CBU3j8mDt2SNn3iQUpAOYwolrwjWEDTC020YtyLKex2P5ZG1wZPQObPPvYstUC0vcftA/ujj2mgcwu2lHR8N+Gc7uug3WnB58tWU3zMbmfcYxoGigFDxbY4wRqOSCUvEWAP2cyi7NY0iFrRNx0Z6jgmGWZAhE4/hzjmlSiVIs15/JjG5sIUeIpV/Xnp9ZdIVVFw/wY9ydq+4kTSWEdVWjxd1iNqkBuSJg+G6xXa50hFEhYJbVSMWfFdJDPWKofFFIzRp68XL+4xObUT0LDtS/iIktCJUdouXA3V0nZmy1PNL2yTM9mqFoyjAqj8JtAwcejtQdoI6q1/vC445/KmKjBQMHe9eL001zzpkVoQd8jKhPIH5MmUFS+dCqvk=
+  file: target/release/movie-report
+  on:
+    repo: zethra/movie-report
+  skip_cleanup: 'true'
