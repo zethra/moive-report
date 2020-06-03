@@ -3,6 +3,7 @@ use horrorshow::html;
 use qmetaobject::*;
 use serde_derive::Deserialize;
 use std::collections::HashMap;
+use std::env;
 use std::fs::{self, File};
 use std::path::Path;
 
@@ -98,9 +99,22 @@ qrc!(init_qml_resources,
 );
 
 fn main() {
-    init_qml_resources();
-    qml_register_type::<UI>(cstr!("UI"), 1, 0, cstr!("UI"));
-    let mut engine = QmlEngine::new();
-    engine.load_file("qrc:/src/ui.qml".into());
-    engine.exec();
+    let args: Vec<String> = env::args().collect();
+    if args.len() == 2 || args.len() == 3 {
+        let in_path = Path::new(&args[1]);
+        let out_path = if args.len() == 3 {
+            Path::new(&args[2])
+        } else {
+            Path::new("./report.html")
+        };
+        let movies = load_csv(in_path);
+        let report_html = generate_report(&movies);
+        fs::write(&out_path, &report_html).expect("Failed to write file");
+    } else {
+        init_qml_resources();
+        qml_register_type::<UI>(cstr!("UI"), 1, 0, cstr!("UI"));
+        let mut engine = QmlEngine::new();
+        engine.load_file("qrc:/src/ui.qml".into());
+        engine.exec();
+    }
 }
