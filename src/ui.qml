@@ -44,6 +44,7 @@ Window {
         folder: shortcuts.home
         selectExisting: true
         defaultSuffix: "csv"
+        nameFilters: [ "CSV files (*.csv)", "All files (*)" ]
         onAccepted: {
             if (model.open(inFile.fileUrl)) {
                 outFile.open()
@@ -57,6 +58,7 @@ Window {
         folder: shortcuts.home
         selectExisting: false
         defaultSuffix: "html"
+        nameFilters: [ "HTML files (*.html)", "All files (*)" ]
         onAccepted: {
             model.save(outFile.fileUrl)
             Qt.quit()
