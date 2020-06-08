@@ -2,3 +2,4 @@
 **/*.rs.bk
 example.html
 report.html
+*.pdf
