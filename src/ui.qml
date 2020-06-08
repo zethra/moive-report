@@ -4,6 +4,7 @@ import QtQuick.Controls 2.0
 import QtQuick.Window 2.0
 import UI 1.0
 import QtQuick.Layouts 1.0
+import QtQuick.Dialogs 1.1
 
 Window {
     id: window
@@ -44,8 +45,9 @@ Window {
         selectExisting: true
         defaultSuffix: "csv"
         onAccepted: {
-            model.open(inFile.fileUrl)
-            outFile.open()
+            if (model.open(inFile.fileUrl)) {
+                outFile.open()
+            }
         }
     }
 
@@ -60,4 +62,14 @@ Window {
             Qt.quit()
         }
     }
+
+    MessageDialog {
+		id: errorDialog
+		title: "Error"
+		icon: StandardIcon.Critical
+		visible: model.has_error
+		text: model.error_msg
+		detailedText: model.error_msg
+		standardButtons: StandardButton.Ok
+	}
 }

@@ -1,3 +1,4 @@
+use anyhow::Result;
 use cstr::*;
 use horrorshow::html;
 use qmetaobject::*;
@@ -17,20 +18,25 @@ struct Movie {
     format: String,
 }
 
-type Movies = HashMap<String, Vec<Movie>>;
+type Movies = Vec<(String, Vec<Movie>)>;
 
-fn load_csv(path: impl AsRef<Path>) -> Movies {
-    let csv_file = File::open(path).unwrap();
+fn load_csv(path: impl AsRef<Path>) -> Result<Movies> {
+    let csv_file = File::open(path)?;
     let mut rdr = csv::Reader::from_reader(csv_file);
     let mut movies = HashMap::new();
     for result in rdr.deserialize() {
-        let movie: Movie = result.unwrap();
-        if !movies.contains_key(&movie.category) {
-            movies.insert(movie.category.clone(), Vec::new());
-        }
-        movies.get_mut(&movie.category).unwrap().push(movie);
+        let movie: Movie = result?;
+        movies
+            .entry(movie.category.clone())
+            .and_modify(|m: &mut Vec<_>| m.push(movie))
+            .or_insert(Vec::new());
     }
-    movies
+    let mut movie_list: Vec<_> = movies.into_iter().collect();
+    movie_list.sort_by(|l, r| l.0.cmp(&r.0));
+    for (_, movies) in &mut movie_list {
+        movies.sort_by(|l, r| l.title.cmp(&r.title));
+    }
+    Ok(movie_list)
 }
 
 fn generate_report(movies: &Movies) -> String {
@@ -74,16 +80,31 @@ fn generate_report(movies: &Movies) -> String {
 struct UI {
     base: qt_base_class!(trait QObject),
     report_html: String,
-    open: qt_method!(fn(&mut self, path: QString)),
+    open: qt_method!(fn(&mut self, path: QString) -> bool),
     save: qt_method!(fn(&self, path: QString)),
+    has_error: qt_property!(bool; NOTIFY has_error_changed),
+    error_msg: qt_property!(QString; NOTIFY error_msg_changed),
+
+    has_error_changed: qt_signal!(),
+    error_msg_changed: qt_signal!(),
 }
 
 impl UI {
-    fn open(&mut self, path: impl Into<QString>) {
+    fn open(&mut self, path: impl Into<QString>) -> bool {
         let path: String = path.into().into();
-        println!("CSV: {}", &path[7..]);
-        let movies = load_csv(&path[7..]);
-        self.report_html = generate_report(&movies);
+        match load_csv(&path[7..]) {
+            Ok(movies) => {
+                self.report_html = generate_report(&movies);
+                true
+            }
+            Err(e) => {
+                self.error_msg = e.to_string().into();
+                self.has_error = true;
+                self.error_msg_changed();
+                self.has_error_changed();
+                false
+            }
+        }
     }
 
     fn save(&self, path: impl Into<QString>) {
@@ -107,9 +128,15 @@ fn main() {
         } else {
             Path::new("./report.html")
         };
-        let movies = load_csv(in_path);
-        let report_html = generate_report(&movies);
-        fs::write(&out_path, &report_html).expect("Failed to write file");
+        match load_csv(in_path) {
+            Ok(movies) => {
+                let report_html = generate_report(&movies);
+                fs::write(&out_path, &report_html).expect("Failed to write file");
+            }
+            Err(e) => {
+                eprintln!("{}", e);
+            }
+        }
     } else {
         init_qml_resources();
         qml_register_type::<UI>(cstr!("UI"), 1, 0, cstr!("UI"));
