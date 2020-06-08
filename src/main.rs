@@ -126,7 +126,7 @@ fn main() {
         let out_path = if args.len() == 3 {
             Path::new(&args[2])
         } else {
-            Path::new("./report.html")
+            Path::new("./Video Collection.html")
         };
         match load_csv(in_path) {
             Ok(movies) => {
