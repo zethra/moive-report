@@ -13,4 +13,5 @@ deploy:
   file: target/release/movie-report
   on:
     repo: zethra/movie-report
+    tags: true
   skip_cleanup: 'true'
